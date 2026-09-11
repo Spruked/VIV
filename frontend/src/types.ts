@@ -17,6 +17,23 @@ export type RelevanceAssessment = {
   assessed_at?: string
 }
 
+export type DossierValueProfile = {
+  contact_id: string
+  party_id: string
+  business_scope: string
+  real_value: number
+  cost: number
+  net_real_contribution: number
+  intrinsic_value: number
+  future_potential_value: number
+  net_total_value: number
+  confidence: number
+  notes?: string | null
+  source?: string | null
+  calculation_version?: string | null
+  updated_at?: string | null
+}
+
 export type Contact = {
   id?: string
   contact_id?: string
