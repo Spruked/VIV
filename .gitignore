@@ -1,0 +1,56 @@
+# Secrets and provider configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+config/research_providers.json
+
+# Runtime data and personal/contact intelligence
+*.db
+*.sqlite
+*.sqlite3
+data/
+runtime/
+vault/
+evidence/
+research_results/
+exports/
+backups/
+
+# Logs and generated files
+*.log
+logs/
+*.tmp
+*.bak
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.next/
+.vite/
+coverage/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local startup/runtime markers
+.startup_initialized
