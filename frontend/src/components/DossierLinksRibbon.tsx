@@ -1,9 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ExternalLink, Globe, Image, Link2, MapPin, Newspaper, Phone, Radar, RefreshCcw, Search, Trash2, Users } from 'lucide-react'
 import { toast } from 'sonner'
+import { DossierValueProfilePanel, type DossierValueDraft } from '@/components/DossierValueProfile'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
-import type { ExternalLinkRecord } from '@/types'
+import type { DossierValueProfile, ExternalLinkRecord } from '@/types'
 
 const PLATFORM_ICONS: Record<string, { icon: ReactNode; color: string }> = {
   google_search: { icon: <Search size={14} />, color: 'text-blue-400 hover:bg-blue-950/40' },
@@ -58,8 +59,10 @@ function researchDate(value?: string | null) {
 export function DossierLinksRibbon({ contactId }: { contactId: string }) {
   const [links, setLinks] = useState<ExternalLinkRecord[]>([])
   const [research, setResearch] = useState<ResearchItem[]>([])
+  const [valueProfile, setValueProfile] = useState<DossierValueProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [researchLoading, setResearchLoading] = useState(false)
+  const [valueSaving, setValueSaving] = useState(false)
 
   const fetchLinks = async () => {
     try {
@@ -78,6 +81,34 @@ export function DossierLinksRibbon({ contactId }: { contactId: string }) {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load dossier research'
       toast.error(message)
+    }
+  }
+
+  const fetchValueProfile = async () => {
+    try {
+      const response = await api.get(`/cali/intelligence/contacts/${contactId}/value-profile`, {
+        params: { business_scope: 'all' },
+      })
+      setValueProfile(response.data as DossierValueProfile)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load dossier value profile'
+      toast.error(message)
+    }
+  }
+
+  const saveValueProfile = async (draft: DossierValueDraft) => {
+    setValueSaving(true)
+    try {
+      const response = await api.put(`/cali/intelligence/contacts/${contactId}/value-profile`, draft, {
+        params: { business_scope: 'all' },
+      })
+      setValueProfile(response.data as DossierValueProfile)
+      toast.success('Dossier value profile saved')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save dossier value profile'
+      toast.error(message)
+    } finally {
+      setValueSaving(false)
     }
   }
 
@@ -139,102 +170,111 @@ export function DossierLinksRibbon({ contactId }: { contactId: string }) {
 
   useEffect(() => {
     if (!contactId) return
-    void Promise.all([fetchLinks(), fetchResearch()])
+    void Promise.all([fetchLinks(), fetchResearch(), fetchValueProfile()])
   }, [contactId])
 
   return (
-    <div className="w-full rounded border border-zinc-800 bg-zinc-950 p-3 font-mono">
-      <div className="mb-2 flex items-center justify-between border-b border-zinc-800 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">External References</span>
-          <span className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-500">{links.length} linked</span>
-        </div>
-        <Button variant="secondary" size="sm" disabled={loading} onClick={handleGenerate} className="h-7 text-[11px]">
-          <RefreshCcw size={10} className={loading ? 'animate-spin' : ''} />
-          Expand Dossier
-        </Button>
-      </div>
+    <div className="w-full space-y-3">
+      <DossierValueProfilePanel
+        profile={valueProfile}
+        contextLabel="Pro Prime consolidated relationship value"
+        saving={valueSaving}
+        onSave={saveValueProfile}
+      />
 
-      {links.length === 0 ? (
-        <div className="py-1 text-[11px] italic text-zinc-600">No external references are linked to this dossier. Generate references to create standard search and verification paths.</div>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {links.map((link) => {
-            const display = PLATFORM_ICONS[link.platform] || PLATFORM_ICONS.custom
-            return (
-              <div
-                key={link.id}
-                onClick={() => executeLink(link.url)}
-                className={`group flex cursor-pointer items-center gap-2 rounded border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-xs transition-all ${display.color}`}
-                title={`Destination: ${link.url}\nType: ${link.link_type}\nSource: ${link.source}`}
-              >
-                <div className="flex items-center gap-1.5">
-                  {display.icon}
-                  <span className="font-medium text-zinc-300">{link.label}</span>
-                </div>
-                <span className={`rounded border px-1 text-[9px] uppercase tracking-tighter ${STATUS_BADGES[link.verified_status] || STATUS_BADGES.manual}`}>
-                  {String(link.verified_status || 'manual').replace('_', ' ')}
-                </span>
-                <ExternalLink size={10} className="opacity-40 group-hover:opacity-100" />
-                <button
-                  onClick={(event) => handleDelete(event, link.id)}
-                  className="ml-1 text-zinc-600 opacity-0 transition-opacity hover:text-rose-400 group-hover:opacity-100"
-                  title="Remove reference"
-                >
-                  <Trash2 size={11} />
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      <div className="mt-3 border-t border-zinc-800 pt-3">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <Radar size={13} className="shrink-0 text-cyan-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Contact Research</span>
-            <span className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-500">{research.length} sources</span>
+      <div className="rounded border border-zinc-800 bg-zinc-950 p-3 font-mono">
+        <div className="mb-2 flex items-center justify-between border-b border-zinc-800 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">External References</span>
+            <span className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-500">{links.length} linked</span>
           </div>
-          <Button variant="secondary" size="sm" disabled={researchLoading} onClick={handleResearch} className="h-7 shrink-0 text-[11px]">
-            <Newspaper size={11} className={researchLoading ? 'animate-pulse' : ''} />
-            Research Latest
+          <Button variant="secondary" size="sm" disabled={loading} onClick={handleGenerate} className="h-7 text-[11px]">
+            <RefreshCcw size={10} className={loading ? 'animate-spin' : ''} />
+            Expand Dossier
           </Button>
         </div>
 
-        <div className="mb-2 text-[10px] leading-4 text-zinc-600">
-          Searches public web, news, and event sources. Results remain unverified evidence until you review them.
-        </div>
-
-        {research.length === 0 ? (
-          <div className="py-1 text-[11px] italic text-zinc-600">No public-source research is stored for this dossier yet.</div>
+        {links.length === 0 ? (
+          <div className="py-1 text-[11px] italic text-zinc-600">No external references are linked to this dossier. Generate references to create standard search and verification paths.</div>
         ) : (
-          <div className="space-y-1.5">
-            {research.slice(0, 12).map((item) => (
-              <button
-                key={item.research_id}
-                type="button"
-                onClick={() => executeLink(item.url)}
-                className="block w-full rounded border border-zinc-800 bg-zinc-900/45 px-2.5 py-2 text-left transition hover:border-cyan-900/60 hover:bg-cyan-950/10"
-                title={item.url}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[11px] font-medium text-zinc-200">{item.title}</div>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9px] uppercase tracking-wide text-zinc-600">
-                      <span className="text-cyan-500">{item.category}</span>
-                      <span>{item.provider}</span>
-                      {item.source_name ? <span className="normal-case tracking-normal">{item.source_name}</span> : null}
-                      {item.published_at ? <span>{researchDate(item.published_at)}</span> : null}
-                    </div>
-                    {item.snippet ? <div className="mt-1 line-clamp-2 text-[10px] leading-4 text-zinc-500">{item.snippet}</div> : null}
+          <div className="flex flex-wrap gap-2">
+            {links.map((link) => {
+              const display = PLATFORM_ICONS[link.platform] || PLATFORM_ICONS.custom
+              return (
+                <div
+                  key={link.id}
+                  onClick={() => executeLink(link.url)}
+                  className={`group flex cursor-pointer items-center gap-2 rounded border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-xs transition-all ${display.color}`}
+                  title={`Destination: ${link.url}\nType: ${link.link_type}\nSource: ${link.source}`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {display.icon}
+                    <span className="font-medium text-zinc-300">{link.label}</span>
                   </div>
-                  <ExternalLink size={10} className="mt-0.5 shrink-0 text-zinc-600" />
+                  <span className={`rounded border px-1 text-[9px] uppercase tracking-tighter ${STATUS_BADGES[link.verified_status] || STATUS_BADGES.manual}`}>
+                    {String(link.verified_status || 'manual').replace('_', ' ')}
+                  </span>
+                  <ExternalLink size={10} className="opacity-40 group-hover:opacity-100" />
+                  <button
+                    onClick={(event) => handleDelete(event, link.id)}
+                    className="ml-1 text-zinc-600 opacity-0 transition-opacity hover:text-rose-400 group-hover:opacity-100"
+                    title="Remove reference"
+                  >
+                    <Trash2 size={11} />
+                  </button>
                 </div>
-              </button>
-            ))}
+              )
+            })}
           </div>
         )}
+
+        <div className="mt-3 border-t border-zinc-800 pt-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <Radar size={13} className="shrink-0 text-cyan-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Contact Research</span>
+              <span className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] text-zinc-500">{research.length} sources</span>
+            </div>
+            <Button variant="secondary" size="sm" disabled={researchLoading} onClick={handleResearch} className="h-7 shrink-0 text-[11px]">
+              <Newspaper size={11} className={researchLoading ? 'animate-pulse' : ''} />
+              Research Latest
+            </Button>
+          </div>
+
+          <div className="mb-2 text-[10px] leading-4 text-zinc-600">
+            Searches public web, news, and event sources. Results remain unverified evidence until you review them.
+          </div>
+
+          {research.length === 0 ? (
+            <div className="py-1 text-[11px] italic text-zinc-600">No public-source research is stored for this dossier yet.</div>
+          ) : (
+            <div className="space-y-1.5">
+              {research.slice(0, 12).map((item) => (
+                <button
+                  key={item.research_id}
+                  type="button"
+                  onClick={() => executeLink(item.url)}
+                  className="block w-full rounded border border-zinc-800 bg-zinc-900/45 px-2.5 py-2 text-left transition hover:border-cyan-900/60 hover:bg-cyan-950/10"
+                  title={item.url}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[11px] font-medium text-zinc-200">{item.title}</div>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9px] uppercase tracking-wide text-zinc-600">
+                        <span className="text-cyan-500">{item.category}</span>
+                        <span>{item.provider}</span>
+                        {item.source_name ? <span className="normal-case tracking-normal">{item.source_name}</span> : null}
+                        {item.published_at ? <span>{researchDate(item.published_at)}</span> : null}
+                      </div>
+                      {item.snippet ? <div className="mt-1 line-clamp-2 text-[10px] leading-4 text-zinc-500">{item.snippet}</div> : null}
+                    </div>
+                    <ExternalLink size={10} className="mt-0.5 shrink-0 text-zinc-600" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
