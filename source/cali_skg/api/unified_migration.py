@@ -75,6 +75,37 @@ def run_unified_migration(db_path: str) -> Dict[str, Any]:
         )
         cur.execute("CREATE INDEX IF NOT EXISTS idx_dossier_media_contact ON dossier_media(contact_id, is_primary DESC, created_at DESC)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_dossier_media_party ON dossier_media(party_id)")
+
+        # Every dossier may carry an economic value profile. Money is stored as
+        # integer cents; derived totals are calculated by the API, never persisted.
+        # business_scope='all' is Bryan's consolidated relationship assessment,
+        # while named scopes can hold business-specific value without duplicating
+        # contacts or crossing into the Financial Systems database.
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS dossier_value_profile (
+                contact_id TEXT NOT NULL,
+                party_id TEXT NOT NULL,
+                business_scope TEXT NOT NULL DEFAULT 'all',
+                real_value_cents INTEGER NOT NULL DEFAULT 0 CHECK(real_value_cents >= 0),
+                cost_cents INTEGER NOT NULL DEFAULT 0 CHECK(cost_cents >= 0),
+                intrinsic_value_cents INTEGER NOT NULL DEFAULT 0 CHECK(intrinsic_value_cents >= 0),
+                future_potential_value_cents INTEGER NOT NULL DEFAULT 0 CHECK(future_potential_value_cents >= 0),
+                confidence INTEGER NOT NULL DEFAULT 0 CHECK(confidence >= 0 AND confidence <= 100),
+                notes TEXT,
+                source TEXT NOT NULL DEFAULT 'operator',
+                calculation_version TEXT NOT NULL DEFAULT 'viv-value-profile-v1',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                PRIMARY KEY(contact_id, business_scope),
+                FOREIGN KEY(contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+            )
+            """
+        )
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_dossier_value_party ON dossier_value_profile(party_id, business_scope)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_dossier_value_total_inputs ON dossier_value_profile(business_scope, real_value_cents, cost_cents, intrinsic_value_cents, future_potential_value_cents)")
+        steps.append("Ensured dossier value profile table")
+
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS emails (
