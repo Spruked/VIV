@@ -16,6 +16,7 @@ from cali_skg.api.relationship_routes import (
     verify_admin as relationship_verify_admin,
 )
 from cali_skg.api.research_routes import router as research_router
+from cali_skg.api.value_routes import router as value_router
 from cali_skg.core.cali_personal_skg import get_cali_skg
 from cali_skg.core.dossier_package_store import ensure_all_dossier_packages
 
@@ -33,6 +34,7 @@ app.include_router(dossier_backfill_router)
 app.include_router(dossier_automation_router)
 app.include_router(dossier_package_router)
 app.include_router(dossier_template_router)
+app.include_router(value_router)
 app.include_router(operations_router)
 app.include_router(identity_operations_router)
 
