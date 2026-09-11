@@ -1,56 +1,55 @@
-# Secrets and provider configuration
-.env
-.env.*
-!.env.example
-*.key
-*.pem
-*.p12
-*.pfx
-secrets/
-config/research_providers.json
-
-# Runtime data and personal/contact intelligence
-*.db
-*.sqlite
-*.sqlite3
-data/
-runtime/
-vault/
-evidence/
-research_results/
-exports/
-backups/
-
-# Logs and generated files
-*.log
-logs/
-*.tmp
-*.bak
-*.zip
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
 
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .venv/
 venv/
-.pytest_cache/
-.coverage
-htmlcov/
+venv_py314_bad/
 
-# Node / frontend
+# Node
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+
+# Logs/runtime
+*.log
+*.out
+*.err
+*.pid
+backend.out.log
+backend.err.log
+frontend-local.out.log
+frontend-local.err.log
+crm-local.out.log
+crm-local.err.log
+crm-wsl.log
+crm-wsl.err.log
+.startup_initialized
+
+# Temp/import/export artifacts
+_tmp_*
+*.tmp
+*.bak
+
+# Build/dist/cache
 dist/
 build/
-.next/
-.vite/
-coverage/
-
-# IDE / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# Local startup/runtime markers
-.startup_initialized
+.cache/

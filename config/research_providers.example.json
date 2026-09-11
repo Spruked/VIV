@@ -1,0 +1,15 @@
+{
+  "timeout_seconds": 10,
+  "providers": {
+    "gdelt": {
+      "enabled": true
+    },
+    "wikipedia": {
+      "enabled": true
+    },
+    "tavily": {
+      "enabled": true,
+      "api_key": ""
+    }
+  }
+}

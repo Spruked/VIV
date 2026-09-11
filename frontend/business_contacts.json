@@ -1,0 +1,85 @@
+[
+  {
+    "name": "MCP management Services",
+    "type": "business",
+    "job_title": "Bill Collector",
+    "phone": "+18164513334"
+  },
+  {
+    "name": "Daniel Kellogg",
+    "type": "business",
+    "job_title": "Honorable Judge",
+    "email": "info@5thcircuit.net",
+    "company": "Division 4 Circuit Court, Buchanan county Courthouse",
+    "phone": "(816) 271-1509"
+  },
+  {
+    "name": "Ding Ding Ding Casino",
+    "type": "business",
+    "job_title": "Customer",
+    "phone": "+1 800-971-0734",
+    "notes": "Service"
+  },
+  {
+    "name": "DingDingDing.com",
+    "type": "business",
+    "job_title": "Support Email",
+    "email": "support@dingdingding.com"
+  },
+  {
+    "name": "Empire Bail Bonds",
+    "type": "business",
+    "phone": "+19133532252"
+  },
+  {
+    "name": "UMKC",
+    "type": "business",
+    "job_title": "Dental School admissions",
+    "phone": "(816) 235-2080",
+    "address": "650 E. 25th Street, Kansas City, MO"
+  },
+  {
+    "name": "Chime Banking",
+    "type": "business",
+    "job_title": "Online",
+    "phone": "(844) 244-6363"
+  },
+  {
+    "name": "Union Gospel Mission",
+    "type": "business",
+    "company": "Kansas City Mo",
+    "phone": "8164744599"
+  },
+  {
+    "name": "Landmark Chrysler Jeep",
+    "type": "business",
+    "job_title": "Chad Clemmons",
+    "notes": "Landmark Chrysler Jeep"
+  },
+  {
+    "name": "Independence Social Security Office",
+    "type": "business",
+    "company": "Social Security Office",
+    "phone": "8668641517"
+  },
+  {
+    "name": "Banister Rediscover",
+    "type": "business",
+    "address": "5904 Banister Rd Suite 100, Kansas city, MO, 64134, United States",
+    "phone": "(816) 384-0700"
+  },
+  {
+    "name": "The Sicola Law Firm, LLC",
+    "type": "business",
+    "job_title": "Anthony Sicola",
+    "email": "ajs@sicolalaw.com",
+    "address": "105 East 5th Street, Suite 503, Kansas City, MO, 64106, United States",
+    "phone": "+1 (816) 509-4219"
+  },
+  {
+    "name": "Tmobile Care",
+    "type": "business",
+    "job_title": "T-Mobile Care",
+    "phone": "+18009378997"
+  }
+]
